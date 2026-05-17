@@ -1,0 +1,181 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<div class="post-page" style="max-width: 900px; margin: 0 auto; padding: 24px;">
+
+    <!-- =========================================================
+         HEADER
+    ========================================================== -->
+
+    <div class="feed-card">
+
+        <div class="feed-header">
+
+            <div class="feed-user">
+
+                <div class="avatar feed-avatar">{{ post.avatar }}</div>
+
+                <div class="feed-meta">
+
+                    <div class="feed-username">
+                        {{ post.username }}
+                    </div>
+
+                    <div class="feed-time">
+                        {{ post.created_at }}
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="feed-badges">
+
+                <span class="badge">
+                    {{ post.type }}
+                </span>
+
+                <span class="badge gold">
+                    {{ post.language }}
+                </span>
+
+            </div>
+
+        </div>
+
+        <!-- TITLE -->
+
+        <div class="feed-title">
+            {{ post.title }}
+        </div>
+
+        <!-- =========================================================
+             PLAYBACK / READING AREA
+        ========================================================== -->
+
+        {% if post.type == "dialogue" %}
+
+            <div class="progress">
+                <div class="progress-fill" data-progress="0"></div>
+            </div>
+
+            <button class="play-button" id="playPost">
+                ▶ Play Cinematic Dialogue
+            </button>
+
+            <div class="tts-caption"
+                 style="text-align:center; margin-top:14px; color:#9ca3af; font-size:14px;">
+                Press play to begin narration...
+            </div>
+
+            <textarea id="scriptData" style="display:none;">{{ post.content }}</textarea>
+
+        {% elif post.type == "audio" %}
+
+            <audio controls style="width:100%; margin-top:10px;">
+                <source src="/static/uploads/{{ post.audio_file }}">
+                Your browser does not support the audio element.
+            </audio>
+
+        {% else %}
+
+            <div style="margin-top:20px; line-height:1.7; color:#e5e7eb;">
+                {{ post.content }}
+            </div>
+
+        {% endif %}
+
+        <!-- =========================================================
+             ACTIONS
+        ========================================================== -->
+
+        <div class="actions">
+
+            <button class="like-button"
+                    data-post-id="{{ post.id }}">
+
+                ❤️ <span class="like-count">{{ post.likes }}</span>
+
+            </button>
+
+            <button class="bookmark-button"
+                    data-post-id="{{ post.id }}">
+
+                🔖 Bookmark
+            </button>
+
+        </div>
+
+    </div>
+
+    <!-- =========================================================
+         RELATED SECTION (PLACEHOLDER)
+    ========================================================== -->
+
+    <div style="margin-top:30px; color:#9ca3af; text-align:center;">
+        Related historical entries coming soon...
+    </div>
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+    const playBtn = document.getElementById("playPost");
+    const script = document.getElementById("scriptData");
+    const captionBox = document.querySelector(".tts-caption");
+    const progressFill = document.querySelector(".progress-fill");
+
+    if (!playBtn || !script || !window.TTS) return;
+
+    let isPlaying = false;
+
+    const updateProgress = ({ index, total }) => {
+        if (!progressFill) return;
+        const percent = total > 0 ? Math.round(((index + 1) / total) * 100) : 0;
+        progressFill.style.width = `${percent}%`;
+    };
+
+    const updateCaption = (text) => {
+        if (!captionBox) return;
+        captionBox.textContent = text || "...";
+    };
+
+    window.TTS.onUpdate(updateProgress);
+    window.TTS.onCaption(updateCaption);
+    window.TTS.onEnd(() => {
+        playBtn.textContent = "▶ Play Cinematic Dialogue";
+        isPlaying = false;
+        updateProgress({ index: 0, total: 0 });
+    });
+
+    playBtn.addEventListener("click", () => {
+        if (isPlaying) {
+            window.TTS.stop();
+            playBtn.textContent = "▶ Play Cinematic Dialogue";
+            isPlaying = false;
+            return;
+        }
+
+        updateCaption("Preparing narration...");
+        updateProgress({ index: 0, total: 0 });
+        window.TTS.playScript(script.value, {
+            speed: Number('{{ post.speed or 1 }}')
+        });
+        playBtn.textContent = "■ Stop Narration";
+        isPlaying = true;
+    });
+
+    document.addEventListener("visibilitychange", () => {
+        if (document.hidden && isPlaying) {
+            window.TTS.stop();
+            playBtn.textContent = "▶ Play Cinematic Dialogue";
+            isPlaying = false;
+        }
+    });
+
+});
+</script>
+
+{% endblock %}

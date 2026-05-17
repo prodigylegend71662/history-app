@@ -1,0 +1,116 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<style>
+    body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        background: radial-gradient(circle at top, #111827, #0b0f14);
+    }
+
+    .auth-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: calc(100vh - 120px);
+        padding: 20px;
+    }
+
+    .auth-container {
+        width: 100%;
+        max-width: 420px;
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(18px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 16px;
+        padding: 28px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+    }
+
+    .auth-title {
+        font-family: "Playfair Display", serif;
+        font-size: 28px;
+        color: #d4af37;
+        text-align: center;
+        margin-bottom: 6px;
+    }
+
+    .auth-subtitle {
+        text-align: center;
+        color: #9ca3af;
+        font-size: 13px;
+        margin-bottom: 20px;
+    }
+
+    .auth-input {
+        width: 100%;
+        padding: 12px;
+        margin-bottom: 12px;
+        border-radius: 10px;
+        border: 1px solid rgba(255,255,255,0.08);
+        background: rgba(255,255,255,0.05);
+        color: white;
+        outline: none;
+    }
+
+    .auth-button {
+        width: 100%;
+        padding: 12px;
+        border-radius: 10px;
+        background: rgba(212, 175, 55, 0.2);
+        border: 1px solid rgba(212, 175, 55, 0.3);
+        color: #d4af37;
+        cursor: pointer;
+        transition: 0.2s ease;
+    }
+
+    .auth-button:hover {
+        background: rgba(212, 175, 55, 0.35);
+    }
+
+    .auth-footer {
+        text-align: center;
+        margin-top: 14px;
+        font-size: 13px;
+        color: #9ca3af;
+    }
+
+    .auth-footer a {
+        color: #d4af37;
+        text-decoration: none;
+    }
+</style>
+
+<div class="auth-wrapper">
+
+    <div class="auth-container">
+
+        <div class="auth-title">Welcome Back</div>
+
+        <div class="auth-subtitle">Enter the historical archive</div>
+
+        <form action="/login" method="post">
+
+            <input class="auth-input" type="text" name="username" placeholder="Username" required>
+
+            <input class="auth-input" type="password" name="password" placeholder="Password" required>
+
+            <button class="auth-button" type="submit">
+                Login
+            </button>
+
+        </form>
+
+        <div class="auth-footer">
+            Don’t have an account?
+            <a href="/register">Register</a>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

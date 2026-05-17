@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<div style="
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:70vh;
+    padding:20px;
+">
+
+    <div class="feed-card" style="max-width:420px; text-align:center;">
+
+        <div style="
+            font-family:'Playfair Display', serif;
+            font-size:28px;
+            color:#d4af37;
+            margin-bottom:10px;
+        ">
+            Logged Out
+        </div>
+
+        <div style="color:#9ca3af; font-size:14px; margin-bottom:20px;">
+            You have safely exited the historical archive.
+        </div>
+
+        <a href="/" class="play-button" style="display:inline-block; text-decoration:none;">
+            Return to Feed
+        </a>
+
+        <div style="margin-top:12px;">
+            <a href="/login" style="color:#d4af37; text-decoration:none; font-size:13px;">
+                Login again
+            </a>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

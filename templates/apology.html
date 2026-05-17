@@ -1,0 +1,57 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<div class="apology-container">
+
+    <div class="apology-card">
+
+        <!-- =========================================================
+             ERROR CODE
+        ========================================================== -->
+
+        <div class="apology-code">
+            {{ top or "Error" }}
+        </div>
+
+        <!-- =========================================================
+             TITLE
+        ========================================================== -->
+
+        <div class="apology-title">
+            The archive has encountered a disruption
+        </div>
+
+        <!-- =========================================================
+             MESSAGE
+        ========================================================== -->
+
+        <div class="apology-message">
+            {{ bottom or "Something went wrong while processing this historical record." }}
+        </div>
+
+        <!-- =========================================================
+             ACTIONS
+        ========================================================== -->
+
+        <div class="apology-actions">
+
+            <a href="/">Return to Feed</a>
+
+            {% if session.get("user_id") %}
+
+                <a href="/create">Create Story</a>
+
+            {% else %}
+
+                <a href="/login">Login</a>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

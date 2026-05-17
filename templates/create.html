@@ -1,0 +1,149 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<div class="create-container">
+
+    <h2 style="font-family: 'Playfair Display', serif; color:#d4af37; text-align:center; margin-bottom:20px;">
+        Create Historical Entry
+    </h2>
+
+    <!-- =========================================================
+         FORM WRAPPER (IMPORTANT FIX)
+    ========================================================== -->
+
+    <form class="create-form" action="/create" method="post" enctype="multipart/form-data">
+
+        <!-- =========================================================
+             POST TYPE
+        ========================================================== -->
+
+        <label>Post Type</label>
+
+        <select id="postType" name="type">
+            <option value="dialogue">Dialogue (TTS Scene)</option>
+            <option value="audio">Audio Upload</option>
+            <option value="read-only">Read-only Article</option>
+        </select>
+
+        <!-- =========================================================
+             TITLE
+        ========================================================== -->
+
+        <label>Title</label>
+
+        <input type="text" id="title" name="title" placeholder="Enter historical title" required>
+
+        <!-- =========================================================
+             LANGUAGE
+        ========================================================== -->
+
+        <label>Language</label>
+
+        <select name="language">
+            <option value="en-US">English (US)</option>
+            <option value="en-GB">English (UK)</option>
+            <option value="fr-CA">French (Canada)</option>
+            <option value="fr-FR">French (France)</option>
+            <option value="es-ES">Spanish</option>
+            <option value="de-DE">German</option>
+        </select>
+
+        <!-- =========================================================
+             DIALOGUE SECTION
+        ========================================================== -->
+
+        <div class="create-section dialogue-editor-section section-visible">
+
+            <h3>Dialogue Script</h3>
+
+            <textarea
+                class="dialogue-script-editor"
+                name="content"
+                placeholder="[p1|name=Napoleon|lang=fr-CA|voice=...]
+Bonjour.
+
+[p2|name=Wellington|lang=en-US]
+We are ready."
+            ></textarea>
+
+            <div class="syntax-preview"
+                 style="margin-top:10px; font-size:13px; color:#9ca3af;">
+            </div>
+
+            <!-- ADD SPEAKER BUTTON -->
+            <button type="button" id="addSpeaker" class="control-button">
+                + Add Speaker
+            </button>
+
+            <!-- IMPORTANT: REQUIRED FOR JS -->
+            <div class="speaker-list"></div>
+
+            <div style="margin-top:12px;">
+                <label>Playback Speed</label>
+
+                <select id="playbackSpeed" name="speed">
+                    <option value="0.75">0.75x</option>
+                    <option value="1" selected>1x</option>
+                    <option value="1.25">1.25x</option>
+                    <option value="1.5">1.5x</option>
+                </select>
+            </div>
+
+        </div>
+
+        <!-- =========================================================
+             AUDIO SECTION
+        ========================================================== -->
+
+        <div class="create-section audio-upload-section">
+
+            <h3>Upload Audio</h3>
+
+            <label class="audio-upload-label">
+                Choose audio file
+            </label>
+
+            <input type="file" id="audioUpload" name="audio" accept="audio/*">
+
+        </div>
+
+        <!-- =========================================================
+             READ ONLY SECTION
+        ========================================================== -->
+
+        <div class="create-section readonly-editor-section">
+
+            <h3>Article Content</h3>
+
+            <textarea name="content" placeholder="Write historical article..."></textarea>
+
+        </div>
+
+        <!-- =========================================================
+             LIVE PREVIEW
+        ========================================================== -->
+
+        <div style="margin-top:30px; padding:15px; border:1px solid rgba(255,255,255,0.08); border-radius:12px;">
+            <h3 class="preview-title" style="font-family:'Playfair Display'; color:#d4af37;">
+                Live Preview
+            </h3>
+
+            <div class="preview-caption" style="color:#9ca3af; font-size:13px;">
+                Dialogue preview...
+            </div>
+        </div>
+
+        <!-- =========================================================
+             PUBLISH BUTTON (FIXED)
+        ========================================================== -->
+
+        <button class="auth-button" type="submit" style="margin-top:20px;">
+            Publish Story
+        </button>
+
+    </form>
+
+</div>
+
+{% endblock %}

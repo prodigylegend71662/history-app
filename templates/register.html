@@ -1,0 +1,204 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<style>
+    .auth-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: calc(100vh - 120px);
+        padding: 20px;
+    }
+
+    .auth-container {
+        width: 100%;
+        max-width: 460px;
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(18px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 16px;
+        padding: 28px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+        animation: fadeIn 0.4s ease;
+    }
+
+    .auth-title {
+        font-family: "Playfair Display", serif;
+        font-size: 28px;
+        color: #d4af37;
+        text-align: center;
+        margin-bottom: 6px;
+    }
+
+    .auth-subtitle {
+        text-align: center;
+        color: #9ca3af;
+        font-size: 13px;
+        margin-bottom: 20px;
+    }
+
+    .auth-input {
+        width: 100%;
+        padding: 12px;
+        margin-bottom: 12px;
+        border-radius: 10px;
+        border: 1px solid rgba(255,255,255,0.08);
+        background: rgba(255,255,255,0.05);
+        color: white;
+        outline: none;
+    }
+
+    .auth-button {
+        width: 100%;
+        padding: 12px;
+        border-radius: 10px;
+        background: rgba(212, 175, 55, 0.2);
+        border: 1px solid rgba(212, 175, 55, 0.3);
+        color: #d4af37;
+        cursor: pointer;
+        transition: 0.2s ease;
+    }
+
+    .auth-button:hover {
+        background: rgba(212, 175, 55, 0.35);
+    }
+
+    .auth-footer {
+        text-align: center;
+        margin-top: 14px;
+        font-size: 13px;
+        color: #9ca3af;
+    }
+
+    .auth-footer a {
+        color: #d4af37;
+        text-decoration: none;
+    }
+
+    .avatar-grid {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 8px;
+        margin: 10px 0 14px;
+    }
+
+    /* ✅ UPDATED FOR EMOJIS */
+    .avatar-option {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        border: 2px solid transparent;
+        cursor: pointer;
+        background: rgba(255,255,255,0.08);
+        transition: 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        user-select: none;
+    }
+
+    .avatar-option:hover {
+        border-color: rgba(212, 175, 55, 0.5);
+        transform: scale(1.05);
+    }
+
+    .avatar-option.selected {
+        border-color: #d4af37;
+        box-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<div class="auth-wrapper">
+
+    <div class="auth-container">
+
+        <div class="auth-title">Create Account</div>
+
+        <div class="auth-subtitle">
+            Join the historical archive
+        </div>
+
+        <form action="/register" method="post">
+
+            <input class="auth-input" type="text" name="username" placeholder="Username" required>
+
+            <input class="auth-input" type="password" name="password" placeholder="Password" required>
+
+            <input class="auth-input" type="password" name="confirmation" placeholder="Confirm Password" required>
+
+            <input class="auth-input" type="hidden" name="avatar" id="avatarInput" value="👤">
+
+            <div class="auth-subtitle">
+                Choose Avatar
+            </div>
+
+            <!-- ✅ EMOJI AVATARS -->
+            <div class="avatar-grid" id="avatarGrid">
+
+                <div class="avatar-option" data-avatar="👑">👑</div>
+                <div class="avatar-option" data-avatar="⚔️">⚔️</div>
+                <div class="avatar-option" data-avatar="🏛️">🏛️</div>
+                <div class="avatar-option" data-avatar="📜">📜</div>
+                <div class="avatar-option" data-avatar="🛡️">🛡️</div>
+                <div class="avatar-option" data-avatar="🗡️">🗡️</div>
+                <div class="avatar-option" data-avatar="🐎">🐎</div>
+                <div class="avatar-option" data-avatar="🏰">🏰</div>
+                <div class="avatar-option" data-avatar="🕰️">🕰️</div>
+                <div class="avatar-option" data-avatar="🌍">🌍</div>
+                <div class="avatar-option" data-avatar="🎩">🎩</div>
+                <div class="avatar-option" data-avatar="🪶">🪶</div>
+
+            </div>
+
+            <button class="auth-button" type="submit">
+                Register
+            </button>
+
+        </form>
+
+        <div class="auth-footer">
+            Already have an account?
+            <a href="/login">Login</a>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+    const options = Array.from(document.querySelectorAll(".avatar-option"));
+    const input = document.getElementById("avatarInput");
+
+    const selectAvatar = (opt) => {
+        options.forEach(o => o.classList.remove("selected"));
+        opt.classList.add("selected");
+        input.value = opt.dataset.avatar;
+    };
+
+    options.forEach(opt => {
+        opt.addEventListener("click", () => selectAvatar(opt));
+    });
+
+    if (!input.value && options.length) {
+        selectAvatar(options[0]);
+    }
+
+});
+</script>
+
+{% endblock %}

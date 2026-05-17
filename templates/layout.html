@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        {% if title %}{{ title }}{% else %}Feed{% endif %} | His Story of History
+    </title>
+
+    <link rel="stylesheet" href="/static/styles.css">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <!-- =========================================================
+         NAVBAR
+    ========================================================== -->
+
+    <nav class="navbar">
+
+        <div class="navbar-title">
+            His Story of History
+        </div>
+
+        <div class="navbar-links">
+
+            <a href="/">Feed</a>
+
+            {% if session.get("user_id") %}
+
+                <a href="/create">Create</a>
+
+                <a href="/profile/{{ session.get('username') or '' }}">Profile</a>
+
+                <a href="/logout">Logout</a>
+
+            {% else %}
+
+                <a href="/login">Login</a>
+
+                <a href="/register">Register</a>
+
+            {% endif %}
+
+        </div>
+
+    </nav>
+
+    <!-- =========================================================
+         FLASH MESSAGES
+    ========================================================== -->
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+
+        {% if messages %}
+
+            <div class="flash-container">
+
+                {% for category, message in messages %}
+
+                    <div class="flash-message {{ category }}">
+                        {{ message }}
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% endif %}
+
+    {% endwith %}
+
+    <!-- =========================================================
+         MAIN CONTENT
+    ========================================================== -->
+
+    <main>
+
+        {% block content %}{% endblock %}
+
+    </main>
+
+    <!-- =========================================================
+         FOOTER
+    ========================================================== -->
+
+    <footer style="text-align:center; padding:20px; color:#9ca3af; font-size:12px;">
+        © {{ current_year }} His Story of History • A cinematic historical archive
+    </footer>
+
+    <!-- =========================================================
+         SCRIPTS
+    ========================================================== -->
+
+    <script src="/static/script.js"></script>
+    <script src="/static/tts.js"></script>
+
+</body>
+
+</html>

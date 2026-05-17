@@ -1,0 +1,115 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<div class="feed-container">
+
+    {% for post in posts %}
+
+    <div class="feed-card"
+         data-title="{{ post.title }}">
+
+        <!-- =========================================================
+             HEADER
+        ========================================================== -->
+
+        <div class="feed-header">
+
+            <div class="feed-user">
+
+                <div class="avatar feed-avatar">{{ post.avatar }}</div>
+
+                <div class="feed-meta">
+
+                    <div class="feed-username">
+                        {{ post.username }}
+                    </div>
+
+                    <div class="feed-time">
+                        {{ post.created_at }}
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="feed-badges">
+
+                <span class="badge">
+                    {{ post.type }}
+                </span>
+
+                <span class="badge gold">
+                    {{ post.language }}
+                </span>
+
+            </div>
+
+        </div>
+
+        <!-- =========================================================
+             TITLE
+        ========================================================== -->
+
+        <div class="feed-title">
+            {{ post.title }}
+        </div>
+
+        <!-- =========================================================
+             PROGRESS
+        ========================================================== -->
+
+        <div class="progress">
+            <div class="progress-fill"
+                 data-progress="0">
+            </div>
+        </div>
+
+        <!-- =========================================================
+             PLAY BUTTON
+        ========================================================== -->
+
+        <button class="play-button"
+                onclick="window.location.href='/post/{{ post.id }}'">
+
+            ▶ Play / Enter
+
+        </button>
+
+        <!-- =========================================================
+             PREVIEW / CAPTION
+        ========================================================== -->
+
+        <div style="text-align:center; color:#9ca3af; font-size:13px; margin-top:8px;">
+            {{ post.preview }}
+        </div>
+
+        <!-- =========================================================
+             ACTIONS
+        ========================================================== -->
+
+        <div class="actions">
+
+            <button class="like-button"
+                    data-post-id="{{ post.id }}">
+
+                ❤️ <span class="like-count">{{ post.likes }}</span>
+
+            </button>
+
+            <button class="bookmark-button"
+                    data-post-id="{{ post.id }}">
+
+                🔖 {{ post.bookmark_count }}
+
+            </button>
+
+        </div>
+
+    </div>
+
+    {% endfor %}
+
+</div>
+
+{% endblock %}
