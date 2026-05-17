@@ -36,7 +36,7 @@
 
                 <a href="/create">Create</a>
 
-                <a href="/profile/{{ session.get('username') or '' }}">Profile</a>
+               <a href="/profile/{{ current_user.username }}">Profile</a>
 
                 <a href="/logout">Logout</a>
 
