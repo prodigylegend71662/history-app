@@ -498,7 +498,4 @@ if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5000)
     @app.errorhandler(500)
 
-    def internal_error(e):
-    import traceback
-    print("\n".join(traceback.format_exc()))
-    return "500 ERROR (check logs)", 500
+    
