@@ -303,79 +303,116 @@ def create():
 @app.route("/profile/<username>")
 def profile(username):
 
-    user = query_db(
-        "SELECT * FROM users WHERE username = ?",
-        (username,),
-        one=True
-    )
-
-    if not user:
-        return render_template("apology.html",
-            title="Not Found",
-            message="User not found."
-        ), 404
-
-    user = dict(user)
-    user["avatar"] = sanitize_avatar(user.get("avatar") or "👤")
-
-    # safe timestamp
-    user["created_at"] = format_timestamp(user.get("created_at"))
-
-    # POSTS (format properly)
-    raw_posts = query_db(
-        "SELECT * FROM posts WHERE user_id = ? ORDER BY created_at DESC",
-        (user["id"],)
-    ) or []
-
-    posts = []
-    for p in raw_posts:
-        p = dict(p)
-        p["created_at"] = format_timestamp(p.get("created_at"))
-        posts.append(p)
-
-    # BOOKMARKS (safe + formatted)
     try:
-        raw_bookmarks = query_db("""
-            SELECT posts.*
-            FROM bookmarks
-            JOIN posts ON bookmarks.post_id = posts.id
-            WHERE bookmarks.user_id = ?
-        """, (user["id"],)) or []
-    except:
-        raw_bookmarks = []
+        user = query_db(
+            "SELECT * FROM users WHERE username = ?",
+            (username,),
+            one=True
+        )
 
-    bookmarks = []
-    for b in raw_bookmarks:
-        b = dict(b)
-        b["created_at"] = format_timestamp(b.get("created_at"))
-        bookmarks.append(b)
+        if not user:
+            return render_template(
+                "apology.html",
+                title="Not Found",
+                message="User not found."
+            ), 404
 
-    # STATS
-    stats = query_db("""
-        SELECT 
-            COUNT(*) AS posts,
-            COALESCE(SUM(likes),0) AS likes,
-            COALESCE(SUM(views),0) AS views
-        FROM posts
-        WHERE user_id = ?
-    """, (user["id"],), one=True)
+        user = dict(user)
 
-    stats = dict(stats) if stats else {"posts": 0, "likes": 0, "views": 0}
+        # SAFE avatar
+        user["avatar"] = sanitize_avatar(user.get("avatar") or "👤")
 
-    bookmark_count = query_db("""
-        SELECT COUNT(*) AS c FROM bookmarks WHERE user_id = ?
-    """, (user["id"],), one=True)
+        # SAFE timestamp (no format crash possible)
+        user["created_at"] = str(user.get("created_at") or "Unknown")
 
-    stats["bookmarks"] = bookmark_count["c"] if bookmark_count else 0
+        user_id = user["id"]
 
-    return render_template(
-        "profile.html",
-        title=username,
-        user=user,
-        posts=posts,
-        bookmarks=bookmarks,
-        stats=stats
-    )
+        # =========================
+        # POSTS (SAFE + JOIN USERNAME)
+        # =========================
+        posts = query_db("""
+            SELECT posts.*, users.username
+            FROM posts
+            JOIN users ON posts.user_id = users.id
+            WHERE posts.user_id = ?
+            ORDER BY posts.created_at DESC
+        """, (user_id,)) or []
+
+        safe_posts = []
+        for p in posts:
+            p = dict(p)
+            p["created_at"] = str(p.get("created_at") or "")
+            p["title"] = p.get("title") or "Untitled"
+            p["type"] = p.get("type") or "unknown"
+            safe_posts.append(p)
+
+        # =========================
+        # BOOKMARKS (SAFE JOIN)
+        # =========================
+        try:
+            bookmarks = query_db("""
+                SELECT posts.*, users.username
+                FROM bookmarks
+                JOIN posts ON bookmarks.post_id = posts.id
+                JOIN users ON posts.user_id = users.id
+                WHERE bookmarks.user_id = ?
+            """, (user_id,)) or []
+        except:
+            bookmarks = []
+
+        safe_bookmarks = []
+        for b in bookmarks:
+            b = dict(b)
+            b["created_at"] = str(b.get("created_at") or "")
+            b["title"] = b.get("title") or "Untitled"
+            safe_bookmarks.append(b)
+
+        # =========================
+        # STATS (100% SAFE)
+        # =========================
+        stats = query_db("""
+            SELECT 
+                COUNT(*) AS posts,
+                COALESCE(SUM(likes), 0) AS likes,
+                COALESCE(SUM(views), 0) AS views
+            FROM posts
+            WHERE user_id = ?
+        """, (user_id,), one=True)
+
+        stats = dict(stats) if stats else {
+            "posts": 0,
+            "likes": 0,
+            "views": 0
+        }
+
+        # bookmarks count safe
+        try:
+            bc = query_db(
+                "SELECT COUNT(*) AS c FROM bookmarks WHERE user_id = ?",
+                (user_id,),
+                one=True
+            )
+            stats["bookmarks"] = bc["c"] if bc else 0
+        except:
+            stats["bookmarks"] = 0
+
+        return render_template(
+            "profile.html",
+            title=username,
+            user=user,
+            posts=safe_posts,
+            bookmarks=safe_bookmarks,
+            stats=stats
+        )
+
+    except Exception as e:
+        import traceback
+        print(traceback.format_exc())
+        return render_template(
+            "apology.html",
+            title="Error",
+            message="Profile failed safely. Check logs."
+        ), 500
 # =========================================================
 # AUTH (REGISTER FIX ADDED)
 # =========================================================
