@@ -201,7 +201,7 @@ def post(post_id):
     """, (post_id,), one=True)
 
     if not post:
-        return render_template("error.html",
+        return render_template("apology.html",
             title="Not Found",
             message="Historical entry not found."
         ), 404
@@ -310,7 +310,7 @@ def profile(username):
     )
 
     if not user:
-        return render_template("error.html",
+        return render_template("apology.html",
             title="Not Found",
             message="User not found."
         ), 404
