@@ -316,29 +316,41 @@ def profile(username):
         ), 404
 
     user = dict(user)
-    user["avatar"] = sanitize_avatar(user.get("avatar", ""))
+    user["avatar"] = sanitize_avatar(user.get("avatar") or "👤")
 
-    # SAFE created_at fallback
-    user["created_at"] = format_timestamp(user.get("created_at") or datetime.now())
+    # safe timestamp
+    user["created_at"] = format_timestamp(user.get("created_at"))
 
-    # POSTS (safe)
-    posts = query_db(
+    # POSTS (format properly)
+    raw_posts = query_db(
         "SELECT * FROM posts WHERE user_id = ? ORDER BY created_at DESC",
         (user["id"],)
     ) or []
 
-    # BOOKMARKS (SAFE — NO CRASH IF TABLE MISSING)
+    posts = []
+    for p in raw_posts:
+        p = dict(p)
+        p["created_at"] = format_timestamp(p.get("created_at"))
+        posts.append(p)
+
+    # BOOKMARKS (safe + formatted)
     try:
-        bookmarks = query_db("""
+        raw_bookmarks = query_db("""
             SELECT posts.*
             FROM bookmarks
             JOIN posts ON bookmarks.post_id = posts.id
             WHERE bookmarks.user_id = ?
         """, (user["id"],)) or []
     except:
-        bookmarks = []
+        raw_bookmarks = []
 
-    # STATS (safe fallback)
+    bookmarks = []
+    for b in raw_bookmarks:
+        b = dict(b)
+        b["created_at"] = format_timestamp(b.get("created_at"))
+        bookmarks.append(b)
+
+    # STATS
     stats = query_db("""
         SELECT 
             COUNT(*) AS posts,
@@ -348,21 +360,13 @@ def profile(username):
         WHERE user_id = ?
     """, (user["id"],), one=True)
 
-    if not stats:
-        stats = {"posts": 0, "likes": 0, "views": 0}
-    else:
-        stats = dict(stats)
+    stats = dict(stats) if stats else {"posts": 0, "likes": 0, "views": 0}
 
-    # bookmark count safe
-    try:
-        bookmark_count = query_db(
-            "SELECT COUNT(*) AS c FROM bookmarks WHERE user_id = ?",
-            (user["id"],),
-            one=True
-        )
-        stats["bookmarks"] = bookmark_count["c"] if bookmark_count else 0
-    except:
-        stats["bookmarks"] = 0
+    bookmark_count = query_db("""
+        SELECT COUNT(*) AS c FROM bookmarks WHERE user_id = ?
+    """, (user["id"],), one=True)
+
+    stats["bookmarks"] = bookmark_count["c"] if bookmark_count else 0
 
     return render_template(
         "profile.html",
