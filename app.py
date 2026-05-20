@@ -34,18 +34,21 @@ from helpers import (
 # APP SETUP
 # =========================================================
 
-app = Flask(__name__)
+app = Flask(__name__, instance_relative_config=True)
 
 app.config["SECRET_KEY"] = os.environ.get(
     "SECRET_KEY",
     "change_this_secret_before_production"
 )
 
-app.config["DATABASE"] = "instance/history.db"
-app.config["UPLOAD_FOLDER"] = "static/uploads"
+app.config["DATABASE"] = os.path.join(app.instance_path, "history.db")
+app.config["UPLOAD_FOLDER"] = os.path.join(app.root_path, "static", "uploads")
 app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024
 
-os.makedirs("instance", exist_ok=True)
+ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME", "")
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "")
+
+os.makedirs(app.instance_path, exist_ok=True)
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
 # =========================================================
@@ -53,41 +56,27 @@ os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 # =========================================================
 
 def get_db():
-<<<<<<< HEAD
-=======
     """Get or create SQLite database connection with safety settings."""
 
->>>>>>> caabccd (update project)
     if "db" not in g:
         g.db = sqlite3.connect(app.config["DATABASE"])
         g.db.row_factory = sqlite3.Row
-<<<<<<< HEAD
-=======
-
-        # CRITICAL: Enable foreign key constraints
->>>>>>> caabccd (update project)
         g.db.execute("PRAGMA foreign_keys = ON")
     return g.db
 
 
 @app.teardown_appcontext
 def close_db(exception):
-<<<<<<< HEAD
-=======
     """Safely close database connection after request."""
 
->>>>>>> caabccd (update project)
     db = g.pop("db", None)
     if db:
         db.close()
 
 
 def query_db(query, args=(), one=False):
-<<<<<<< HEAD
-=======
-    """Execute SELECT query safely."""
+    """Execute a SELECT query safely."""
 
->>>>>>> caabccd (update project)
     cur = get_db().execute(query, args)
     rows = cur.fetchall()
     cur.close()
@@ -95,20 +84,14 @@ def query_db(query, args=(), one=False):
 
 
 def execute_db(query, args=()):
-<<<<<<< HEAD
-=======
     """Execute INSERT/UPDATE/DELETE query safely."""
 
->>>>>>> caabccd (update project)
     db = get_db()
     cur = db.execute(query, args)
     db.commit()
     return cur.lastrowid
 
 # =========================================================
-<<<<<<< HEAD
-# HOME
-=======
 # ADMIN DECORATOR
 # =========================================================
 
@@ -147,7 +130,6 @@ def inject_globals():
 
 # =========================================================
 # HOME FEED
->>>>>>> caabccd (update project)
 # =========================================================
 
 @app.route("/")
@@ -180,11 +162,7 @@ def index():
     return render_template("index.html", posts=formatted)
 
 # =========================================================
-<<<<<<< HEAD
-# FIXED POST ROUTE (THIS WAS YOUR CRASH)
-=======
-# POST PAGE - FULLY FIXED INDENTATION
->>>>>>> caabccd (update project)
+# POST PAGE
 # =========================================================
 
 @app.route("/post/<int:post_id>")
@@ -192,11 +170,8 @@ def post(post_id):
     """Render individual post with full dialogue parsing and related posts."""
 
     try:
-<<<<<<< HEAD
-=======
 
         # FIX #1: CRITICAL - Proper indentation inside try block
->>>>>>> caabccd (update project)
         post = query_db("""
             SELECT posts.*, users.username, users.avatar
             FROM posts
@@ -204,19 +179,10 @@ def post(post_id):
             WHERE posts.id = ?
         """, (post_id,), one=True)
 
-<<<<<<< HEAD
+        # FIX #1: Now properly indented inside try block
         if not post:
             return render_template(
                 "apology.html",
-                title="Not Found",
-                message="Post not found"
-            ), 404
-
-        execute_db("UPDATE posts SET views = views + 1 WHERE id = ?", (post_id,))
-=======
-        # FIX #1: Now properly indented inside try block
-        if not post:
-            return render_template("apology.html",
                 title="Not Found",
                 message="Historical entry not found.",
                 top="404"
@@ -227,43 +193,23 @@ def post(post_id):
             "UPDATE posts SET views = views + 1 WHERE id = ?",
             (post_id,)
         )
->>>>>>> caabccd (update project)
 
         post = dict(post)
-        post["avatar"] = sanitize_avatar(post["avatar"] or "👤")
-        post["likes"] = post["likes"] or 0
-        post["views"] = post["views"] or 0
-        post["speed"] = float(post.get("speed") or 1)
-
-<<<<<<< HEAD
-        parsed = []
-=======
-        post["avatar"] = sanitize_avatar(
-            post.get("avatar") or "👤"
-        )
-
-        post["created_at"] = format_timestamp(
-            post.get("created_at")
-        )
-
+        post["avatar"] = sanitize_avatar(post.get("avatar") or "👤")
+        post["created_at"] = format_timestamp(post.get("created_at"))
         post["likes"] = post.get("likes") or 0
-
         post["views"] = post.get("views") or 0
 
-        # FIX #4: Safe float conversion with try/except
         try:
             post["speed"] = float(post.get("speed") or 1)
         except (ValueError, TypeError):
             post["speed"] = 1.0
 
-        # Clamp speed to valid range
         post["speed"] = max(0.5, min(post["speed"], 2.0))
 
         parsed_dialogue = []
-
->>>>>>> caabccd (update project)
-        if post["type"] == "dialogue":
-            parsed = parse_dialogue_script(post["content"])
+        if post.get("type") == "dialogue":
+            parsed_dialogue = parse_dialogue_script(post.get("content") or "")
 
         related = query_db("""
             SELECT id, title, type
@@ -277,17 +223,12 @@ def post(post_id):
         return render_template(
             "post.html",
             post=post,
-            parsed_dialogue=parsed,
+            parsed_dialogue=parsed_dialogue,
             related_posts=related
         )
 
-<<<<<<< HEAD
-    except Exception:
-=======
     except Exception as e:
         # FIX #11: Use proper exception clause instead of bare except
-
->>>>>>> caabccd (update project)
         print(traceback.format_exc())
         return render_template(
             "apology.html",
@@ -296,76 +237,37 @@ def post(post_id):
         ), 500
 
 # =========================================================
-<<<<<<< HEAD
-# RENDER SAFE START (IMPORTANT FIX)
-# =========================================================
-
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 10000))
-    app.run(host="0.0.0.0", port=port, debug=True)
-=======
 # CREATE POST
 # =========================================================
 
 @app.route("/create", methods=["GET", "POST"])
 @login_required
 def create():
-    """Handle post creation for all three types: dialogue, audio, read-only."""
+    """Handle post creation for dialogue, audio, and read-only entries."""
 
     if request.method == "GET":
-
         return render_template(
             "create.html",
-            title="Create"
+            title="Create",
         )
 
     try:
-
-        # =========================================
-        # VERIFY USER STILL EXISTS
-        # =========================================
-
         current_user = query_db(
             "SELECT * FROM users WHERE id = ?",
             (session["user_id"],),
-            one=True
+            one=True,
         )
 
         if not current_user:
-
             session.clear()
+            return apology("Session expired. Login again.", 403)
 
-            return apology(
-                "Session expired. Login again.",
-                403
-            )
+        title = (request.form.get("title", "") or "").strip()
+        post_type = (request.form.get("type", "") or "").strip()
+        language = request.form.get("language", "en-US") or "en-US"
+        content = (request.form.get("content", "") or "").strip()
+        speed_value = request.form.get("speed", "1") or "1"
 
-        title = request.form.get(
-            "title",
-            ""
-        ).strip()
-
-        post_type = request.form.get(
-            "type",
-            ""
-        ).strip()
-
-        language = request.form.get(
-            "language",
-            "en-US"
-        )
-
-        content = request.form.get(
-            "content",
-            ""
-        ).strip()
-
-        speed_value = request.form.get(
-            "speed",
-            "1"
-        )
-
-        # FIX #4: Safe float conversion with try/except
         try:
             speed = float(speed_value)
         except (ValueError, TypeError):
@@ -376,11 +278,7 @@ def create():
         if not title:
             return apology("Title required", 400)
 
-        if post_type not in [
-            "dialogue",
-            "audio",
-            "read-only"
-        ]:
+        if post_type not in ["dialogue", "audio", "read-only"]:
             return apology("Invalid type", 400)
 
         if not validate_language(language):
@@ -388,76 +286,34 @@ def create():
 
         filename = None
 
-        # =========================================
-        # DIALOGUE
-        # =========================================
-
         if post_type == "dialogue":
-
             if not content:
-                return apology(
-                    "Dialogue content required",
-                    400
-                )
+                return apology("Dialogue content required", 400)
 
             parsed = parse_dialogue_script(content)
-
             if not parsed:
-                return apology(
-                    "Invalid dialogue format",
-                    400
-                )
+                return apology("Invalid dialogue format", 400)
 
-        # =========================================
-        # READ ONLY
-        # =========================================
-
-        if post_type == "read-only":
-
-            if not content:
-                return apology(
-                    "Content required",
-                    400
-                )
-
-        # =========================================
-        # AUDIO
-        # =========================================
+        if post_type == "read-only" and not content:
+            return apology("Content required", 400)
 
         if post_type == "audio":
-
             file = request.files.get("audio")
-
             if not file:
-                return apology(
-                    "Audio file required",
-                    400
-                )
+                return apology("Audio file required", 400)
 
             if not allowed_audio_file(file.filename):
+                return apology("Invalid audio file", 400)
 
-                return apology(
-                    "Invalid audio file",
-                    400
-                )
-
-            ext = file.filename.rsplit(".", 1)[1].lower()
-
+            ext = file.filename.rsplit(".", 1)[-1].lower()
             filename = f"{uuid.uuid4().hex}.{ext}"
-
             filepath = os.path.join(
                 app.config["UPLOAD_FOLDER"],
-                secure_filename(filename)
+                secure_filename(filename),
             )
-
             file.save(filepath)
 
-        # =========================================
-        # INSERT POST
-        # =========================================
-
         execute_db("""
-
             INSERT INTO posts (
                 user_id,
                 title,
@@ -466,10 +322,7 @@ def create():
                 language,
                 speed,
                 audio_file
-            )
-
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-
+            ) VALUES (?, ?, ?, ?, ?, ?, ?)
         """, (
             session["user_id"],
             title,
@@ -477,24 +330,18 @@ def create():
             post_type,
             language,
             speed,
-            filename
+            filename,
         ))
 
-        flash(
-            "Historical entry published successfully.",
-            "success"
-        )
-
+        flash("Historical entry published successfully.", "success")
         return redirect("/")
 
     except Exception:
-
         print(traceback.format_exc())
-
         return render_template(
             "apology.html",
             title="Error",
-            message="Publishing failed safely."
+            message="Publishing failed safely.",
         ), 500
 
 # =========================================================
@@ -726,7 +573,8 @@ def logout():
 def admin_command():
     """Admin command processor for moderation tasks."""
 
-    command = request.json.get("command", "").strip()
+    data = request.get_json(silent=True) or {}
+    command = (data.get("command") or "").strip()
 
     parts = command.split()
     action = parts[0].lower() if parts else ""
@@ -915,19 +763,13 @@ def internal_error(error):
     ), 500
 
 # =========================================================
-# MAIN - FIX #5: RENDER COMPATIBLE PORT HANDLING
+# MAIN - RENDER COMPATIBLE PORT HANDLING
 # =========================================================
 
 if __name__ == "__main__":
-    
-    # FIX #5: Read PORT from environment for Render deployment
-    # Fallback to 5000 for local development
-    port = int(os.environ.get("PORT", 5000))
-    
-    # Use 0.0.0.0 for Render compatibility
+    port = int(os.environ.get("PORT", 10000))
     app.run(
         debug=False,
         host="0.0.0.0",
-        port=port
+        port=port,
     )
->>>>>>> caabccd (update project)
